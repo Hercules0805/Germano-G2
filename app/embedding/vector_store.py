@@ -88,6 +88,8 @@ def buscar(
         queries=[query_embedding],
         num_neighbors=top_k,
     )
+    if not resp or not resp[0]:
+        return []
     return [
         {"id": n.id, "distancia": n.distance}
         for n in resp[0]

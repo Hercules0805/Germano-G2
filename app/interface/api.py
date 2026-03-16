@@ -35,7 +35,12 @@ async def webhook_google_chat(request: Request):
     if not mensagem:
         return _chat_response("Não entendi sua mensagem. Tente novamente.")
 
-    resposta = perguntar(mensagem)
+    try:
+        resposta = perguntar(mensagem)
+    except Exception as e:
+        print(f"[erro] {e}")
+        resposta = "Desculpe, ocorreu um erro ao processar sua pergunta."
+
     return _chat_response(resposta)
 
 
