@@ -1,4 +1,6 @@
+import google.auth.transport.requests
 from googleapiclient.discovery import build
+from googleapiclient._auth import authorized_http
 from app.config import get_credentials, DRIVE_FOLDER_ID
 
 _SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
@@ -18,7 +20,9 @@ SUPPORTED_MIME_TYPES = [
 
 
 def _build_service():
-    return build("drive", "v3", credentials=get_credentials(_SCOPES))
+    creds = get_credentials(_SCOPES)
+    creds.refresh(google.auth.transport.requests.Request())
+    return build("drive", "v3", credentials=creds)
 
 
 def listar_arquivos(folder_id: str = None) -> list[dict]:
