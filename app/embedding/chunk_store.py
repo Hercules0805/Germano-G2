@@ -2,6 +2,7 @@ from google.cloud import firestore
 from app.config import get_credentials, PROJECT_ID
 
 _COLLECTION = "chunks"
+_COLLECTION_INDEXADOS = "arquivos_indexados"
 _SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
 
 
@@ -29,6 +30,20 @@ def salvar_chunks(chunks: list[dict]):
 
     batch.commit()
     print(f"  {len(chunks)} chunk(s) salvos no Firestore.")
+
+
+def listar_indexados() -> set[str]:
+    db = _get_client()
+    docs = db.collection(_COLLECTION_INDEXADOS).stream()
+    return {doc.id for doc in docs}
+
+
+def marcar_indexado(file_id: str, nome: str):
+    db = _get_client()
+    db.collection(_COLLECTION_INDEXADOS).document(file_id).set({
+        "nome": nome,
+        "indexado_em": firestore.SERVER_TIMESTAMP,
+    })
 
 
 def buscar_textos(datapoint_ids: list[str]) -> dict[str, str]:
