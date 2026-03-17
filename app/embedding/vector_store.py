@@ -1,7 +1,6 @@
 import time
 import uuid
 from google.cloud import aiplatform
-from google.cloud.aiplatform.compat.types import matching_engine_index_endpoint as me_types
 from app.config import get_credentials, PROJECT_ID, VERTEX_LOCATION
 
 _DIMENSIONS = 768
@@ -63,16 +62,15 @@ def indexar_chunks(chunks_com_embeddings: list[dict], index: aiplatform.Matching
     for chunk in chunks_com_embeddings:
         dp_id = str(uuid.uuid4())
         chunk["datapoint_id"] = dp_id
-        datapoints.append(
-            me_types.IndexDatapoint(
-                datapoint_id=dp_id,
-                feature_vector=chunk["embedding"],
-            )
-        )
+        datapoints.append({
+            "datapoint_id": dp_id,
+            "feature_vector": chunk["embedding"],
+        })
 
     BATCH = 100
     for i in range(0, len(datapoints), BATCH):
-        index.upsert_datapoints(datapoints=datapoints[i: i + BATCH])
+        batch = datapoints[i: i + BATCH]
+        index.upsert_datapoints(datapoints=batch)
         print(f"  Indexados: {min(i + BATCH, len(datapoints))}/{len(datapoints)}")
         time.sleep(0.5)
 
